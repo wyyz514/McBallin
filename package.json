@@ -1,0 +1,28 @@
+{
+  "name": "mcballin",
+  "version": "1.0.0",
+  "description": "Get recreational basketball times via text (McGill)",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WoleObayomi/McBallin.git"
+  },
+  "keywords": [
+    "swag"
+  ],
+  "author": "Wole Obayomi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WoleObayomi/McBallin/issues"
+  },
+  "homepage": "https://github.com/WoleObayomi/McBallin#readme",
+  "dependencies": {
+    "express": "^4.13.4",
+    "google-auth-library": "^0.9.7",
+    "googleapis": "^2.1.7",
+    "mongoose": "^4.4.3"
+  }
+}
