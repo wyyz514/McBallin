@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/WoleObayomi/McBallin#readme",
   "dependencies": {
+    "datejs": "0.0.2",
     "express": "^4.13.4",
     "google-auth-library": "^0.9.7",
     "googleapis": "^2.1.7",
