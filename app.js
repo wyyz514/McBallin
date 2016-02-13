@@ -1,10 +1,11 @@
+//Adapted from https://github.com/mplacona/twilio-pa
 var express = require("express"),
   google = require("googleapis"),
   googleAuth = require('google-auth-library'),
   credentials = require("./config.js");
 
 var app = express(),
-  db = require("./app/db.js"),
+  db_init = require("./app/db.js"),
   calendar = google.calendar('v3'),
   date = require('datejs'),
   auth = new googleAuth(),
@@ -14,13 +15,14 @@ var app = express(),
   port = 3000 | process.env.PORT;
 
 function list_events(auth) {
+  var today = new Date().toISOString();
   calendar.events.list({
   auth: auth,
   calendarId: 'athleticsmcgill@gmail.com',
   maxResults: 10,
   singleEvents: true,
   orderBy: 'startTime',
-  timeMin:new Date().toISOString()
+  timeMin:today
 }, function(err, response) {
   if (err) {
     console.log('The API returned an error: ' + err);
@@ -34,7 +36,8 @@ function list_events(auth) {
     for (var i = 0; i < events.length; i++) {
       var event = events[i];
       var start = event.start.dateTime || event.start.date;
-      console.log('%s - %s', Date.parse(start).toDateString(), event.summary);
+      if(event.summary.toLowerCase().match("rec basketball"))
+        console.log('%s - %s', Date.parse(start).toLocaleString(), event.summary);
     }
   }
 });
@@ -77,5 +80,5 @@ app.get('/auth', function(req, res) {
 
 app.listen(port,function(){
   console.log("Listening on port "+port);
-  db();
+  db_init();
 });
