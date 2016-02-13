@@ -24,6 +24,7 @@
     "express": "^4.13.4",
     "google-auth-library": "^0.9.7",
     "googleapis": "^2.1.7",
-    "mongoose": "^4.4.3"
+    "mongoose": "^4.4.3",
+    "twilio": "^2.9.0"
   }
 }
