@@ -5,7 +5,7 @@ var express = require("express"),
   credentials = require("./config.js");
 
 var app = express(),
-  db_init = require("./app/db.js"),
+  DBConnect = require("./app/db.js"),
   calendar = google.calendar('v3'),
   date = require('datejs'),
   auth = new googleAuth(),
@@ -80,5 +80,10 @@ app.get('/auth', function(req, res) {
 
 app.listen(port,function(){
   console.log("Listening on port "+port);
-  db_init();
+  DBConnect();
+});
+
+app.post("/incoming",function(req,res){
+  console.log(req);
+  res.send("Hello");
 });
