@@ -20,11 +20,16 @@
   },
   "homepage": "https://github.com/WoleObayomi/McBallin#readme",
   "dependencies": {
+    "body-parser": "^1.15.0",
     "datejs": "0.0.2",
     "express": "^4.13.4",
     "google-auth-library": "^0.9.7",
     "googleapis": "^2.1.7",
     "mongoose": "^4.4.3",
+    "q": "^1.4.1",
     "twilio": "^2.9.0"
+  },
+  "engines": {
+    "node": "0.12.7"
   }
 }

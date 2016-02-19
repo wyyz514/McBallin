@@ -2,7 +2,9 @@
 var express = require("express"),
   google = require("googleapis"),
   googleAuth = require('google-auth-library'),
-  credentials = require("./config.js");
+  credentials = require("./config.js"),
+  body_parser = require("body-parser");
+  q = require("q");
 
 var app = express(),
   DBConnect = require("./app/db.js"),
@@ -12,9 +14,29 @@ var app = express(),
   oAuthClient = new auth.OAuth2(credentials.client_id, credentials.client_secret, credentials.redirect_url),
   tokenUtils = require('./app/auth.js')(oAuthClient),
   Token = require("./app/token.js"),
-  port = 3000 | process.env.PORT;
+  rspndr = require("./app/rspndr.js");
+  port = process.env.PORT;
 
-function list_events(auth) {
+app.use(body_parser.urlencoded());
+app.use(body_parser.json());
+
+function refresh_token(req,res,next) {
+
+    Token.findOne({},function(err,tokens){
+      if (tokens) {
+        // If going through here always refresh
+        tokenUtils.refreshToken(tokens.refresh_token);
+        //res.send('authenticated');
+      } else {
+        tokenUtils.requestToken(res);
+      }
+    });
+    next();
+}
+
+function get_event(auth) {
+  var defer = q.defer();
+  var rec_ball_event = "";
   var today = new Date().toISOString();
   calendar.events.list({
   auth: auth,
@@ -32,29 +54,29 @@ function list_events(auth) {
   if (events.length == 0) {
     console.log('No upcoming events found.');
   } else {
-    console.log('Upcoming 10 events:');
+    //console.log('Upcoming 10 events:');
     for (var i = 0; i < events.length; i++) {
       var event = events[i];
       var start = event.start.dateTime || event.start.date;
-      if(event.summary.toLowerCase().match("rec basketball"))
-        console.log('%s - %s', Date.parse(start).toLocaleString(), event.summary);
+      if(event.summary.toLowerCase().match("rec basketball")) {
+        rec_ball_event = new Date(Date.parse(start)).addHours(-5).toLocaleString()+" - "+event.summary;
+        break;
+      }
+        //console.log('%s - %s', Date.parse(start).toLocaleString(), event.summary);
     }
   }
+  if(rec_ball_event != "") {
+    defer.resolve(rec_ball_event);
+  }
+  else {
+    defer.resolve("No rec-ball event today.");
+  }
 });
+
+  return defer.promise;
 }
 
-app.get('/', function(req, res) {
-    Token.findOne({},function(err,tokens){
-      if (tokens) {
-        // If going through here always refresh
-        tokenUtils.refreshToken(tokens.refresh_token);
-        res.send('authenticated');
-        list_events(oAuthClient);
-      } else {
-        tokenUtils.requestToken(res);
-      }
-    });
-});
+app.get('/', refresh_token);
 
 // Return point for oAuth flow
 app.get('/auth', function(req, res) {
@@ -83,7 +105,15 @@ app.listen(port,function(){
   DBConnect();
 });
 
-app.post("/incoming",function(req,res){
-  console.log(req);
-  res.send("Hello");
+app.post("/incoming",
+    refresh_token,
+    function(req,res) {
+      var resp_info = {};
+      resp_info.from = req.body.To;
+      resp_info.to = req.body.From;
+      resp_info.body = req.body.Body;
+      get_event(oAuthClient).then(function(event){
+        resp_info.response = event;
+        rspndr(resp_info);
+      });
 });
